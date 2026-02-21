@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Internships - CareerForge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen p-8">
+    <nav class="bg-gray-900 text-white p-4 flex justify-between">
+        <a href="saved.html" class="hover:text-gray-300">Saved</a>
+        <h1 class="font-bold text-lg">CareerForge</h1>
+        <div>
+            <a href="index.html" class="mr-4 hover:text-gray-300">Home</a>
+            <a href="internships.html" class="hover:text-gray-300">Internships</a>
+        </div>
+    </nav>
+
+    <h1 class="text-3xl font-bold mb-8 text-center">Available Internships</h1>
+
+    <!-- 🔥 DOMAIN FILTER DROPDOWN (Search ke upar paste karna hai) -->
+    <select id="domainFilter" class="border p-2 rounded mb-4 w-full">
+
+
+        <option value="all">All Domains</option>
+        <option value="frontend">Frontend</option>
+        <option value="backend">Backend</option>
+        <option value="ai">AI</option>
+
+    </select>
+    <select id="sortOption" class="border p-2 rounded mb-4 w-full">
+        <option value="default">Sort By</option>
+        <option value="deadlineAsc">Deadline (Earliest First)</option>
+        <option value="deadlineDesc">Deadline (Latest First)</option>
+    </select>
+    <!-- 🔍 Search Bar -->
+    <input type="text" id="searchInput" placeholder="Search internships..." class="border p-2 rounded mb-6 w-full">
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+
+
+        <!-- Card 1 -->
+        <div id="internshipContainer" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        </div>
+
+
+
+    </div>
+
+
+    <script>
+
+        const internships = [
+            {
+                title: "Frontend Intern",
+                company: "TechCorp",
+                deadline: "30 March",
+                domain: "frontend",
+                link: "#"
+            },
+            {
+                title: "Backend Intern",
+                company: "DevLabs",
+                deadline: "5 April",
+                domain: "backend",
+                link: "#"
+            },
+            {
+                title: "AI Intern",
+                company: "InnovateX",
+                deadline: "10 April",
+                domain: "ai",
+                link: "#"
+            }
+        ];
+
+        const container = document.getElementById("internshipContainer");
+        const searchInput = document.getElementById("searchInput");
+        const domainFilter = document.getElementById("domainFilter");
+
+        const sortOption = document.getElementById("sortOption");
+
+        sortOption.addEventListener("change", applyFilters);
+        function displayInternships(data) {
+
+
+            container.innerHTML = "";
+
+            if (data.length === 0) {
+                container.innerHTML = `
+      <div class="col-span-full text-center text-gray-500 text-xl mt-10">
+        No internships found 😢
+      </div>
+    `;
+                return;
+            }
+
+            data.forEach(intern => {
+                let saved = JSON.parse(localStorage.getItem("savedInternships")) || [];
+                const isSaved = saved.includes(intern.title);
+                container.innerHTML += `
+    <div class="bg-white shadow-lg rounded-xl p-6">
+      <h2 class="text-xl font-semibold mb-2">${intern.title}</h2>
+      <p class="text-gray-600 mb-2">Company: ${intern.company}</p>
+      <p class="text-red-500 font-medium mb-4">
+        Deadline: ${intern.deadline}
+      </p>
+
+      <div class="flex gap-3 mt-4">
+  <button onclick="saveInternship('${intern.title}')"
+          class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
+    Save
+  </button>
+
+  <a href="${intern.link}"
+     class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+     Apply Now
+  </a>
+</div>
+    </div>
+  `;
+            });
+
+        }
+
+        // 🔥 YEH FUNCTION DISPLAY KE BAHAR HONA CHAHIYE
+        function applyFilters() {
+
+            const searchValue = searchInput.value.toLowerCase();
+            const selectedDomain = domainFilter.value;
+            const selectedSort = sortOption.value;
+
+            let filtered = internships.filter(intern => {
+
+                const matchesSearch =
+                    intern.title.toLowerCase().includes(searchValue) ||
+                    intern.company.toLowerCase().includes(searchValue);
+
+                const matchesDomain =
+                    selectedDomain === "all" ||
+                    intern.domain === selectedDomain;
+
+                return matchesSearch && matchesDomain;
+            });
+
+            // Sorting logic
+            if (selectedSort === "deadlineAsc") {
+                filtered.sort((a, b) =>
+                    new Date(a.deadline) - new Date(b.deadline)
+                );
+            }
+
+            if (selectedSort === "deadlineDesc") {
+                filtered.sort((a, b) =>
+                    new Date(b.deadline) - new Date(a.deadline)
+                );
+            }
+
+            displayInternships(filtered);
+        }
+        function saveInternship(title) {
+
+            let saved = JSON.parse(localStorage.getItem("savedInternships")) || [];
+
+            if (saved.includes(title)) {
+                // REMOVE
+                saved = saved.filter(item => item !== title);
+                localStorage.setItem("savedInternships", JSON.stringify(saved));
+                alert("Internship Removed ❌");
+            } else {
+                // SAVE
+                saved.push(title);
+                localStorage.setItem("savedInternships", JSON.stringify(saved));
+                alert("Internship Saved ✅");
+            }
+
+            applyFilters(); // UI refresh
+        }
+
+        // Event Listeners
+        searchInput.addEventListener("input", applyFilters);
+        domainFilter.addEventListener("change", applyFilters);
+
+        // Initial Load
+        displayInternships(internships);
+
+    </script>
+</body>
+
+</html>
